@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        .carouselDiv {
+            left: 50%;
+            top: 25%;
+            position: fixed;
+        }
+        .titleDiv {
+            font-family: "Consolas", "Menlo", "Courier", monospace;
+            font-size: 12px;
+            display: block;
+        }
+        .imageThumbnail {
+            cursor: pointer;
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="carousel" class="carouselDiv"></div>
+
+<script type="text/javascript">
+    let api_url = 'https://jsonplaceholder.typicode.com/photos';
+    var images;
+    var globalCurrentImageIndex = 0;
+    var globalImageTimeout = 1000;
+    var globalIntervalSet = false;
+
+    function getJson(url){
+        //todo: validate param not empty && valid URL
+        function reqListener () {
+            //todo: check if response okay - validate JSON, etc
+            images = JSON.parse(this.responseText);
+        }
+        let xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", reqListener );
+        xhr.open("GET",url);
+        xhr.send();
+    }
+
+    function nextImage(){
+        //first remove the current image... then call the load function
+        let carousel = document.getElementById('carousel');
+        carousel.removeChild(carousel.firstChild);
+        populateCurrentImage();
+    }
+
+    function populateCurrentImage(){
+        //fetch image to work with
+        //done: verify that we are not at the end of the images array
+        let currentImage = images[globalCurrentImageIndex];
+        let currentImageIndex = globalCurrentImageIndex;
+        if (images[globalCurrentImageIndex+1]) {
+            globalCurrentImageIndex++;
+        }
+        //create div with img controller
+        let div = document.createElement("div");
+        div.id = 'image'+ currentImageIndex;
+
+        //title
+        let titleDiv = document.createElement("div");
+        titleDiv.className = 'titleDiv';
+        //todo: test all titles to see line breaking
+        titleDiv.innerHTML = currentImage.title;
+        div.appendChild(titleDiv);
+
+        let img = document.createElement("img");
+        img.className = 'imageThumbnail';
+        //todo: validate object members
+        img.src = currentImage.thumbnailUrl;
+        img.onclick = function(){
+            document.location=currentImage.url;
+        }
+        div.appendChild(img);
+        document.getElementById('carousel').appendChild(div);
+
+        //if this was the first image, set interval for changing them
+        if (!globalIntervalSet) {
+            setInterval(nextImage, globalImageTimeout);
+            globalIntervalSet = true;
+        }
+    }
+    //instinctively - placeholder for lazy image loading
+    //https://dev.to/spukas/image-lazy-loading-with-pure-javascript-dkh
+    function populateImages(){
+        //todo: populate all image URls and implement lazy loading with viewport intersectionObserver
+
+        // for (let i=0; i<images.length; i++) {
+        //
+        // }
+    }
+
+    getJson(api_url);
+    //todo: implement placeholder design until loading occurs
+    setTimeout(function(){populateCurrentImage();},2000);
+
+</script>
+</body>
+</html>
